@@ -27,6 +27,7 @@ class Genre(models.Model):
         """Returns the url to access a particular genre instance."""
         return reverse('genre-detail', args=[str(self.id)])
 
+    # Ensures that a genre name is unique
     class Meta:
         constraints = [
             UniqueConstraint(
@@ -50,6 +51,7 @@ class Language(models.Model):
         """String for representing the Model object."""
         return self.name
     
+    # Ensures that a language name is unique
     class Meta:
         constraints = [
             UniqueConstraint(
@@ -84,6 +86,11 @@ class Book(models.Model):
     def get_absolute_url(self):
         """Returns the url to access a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
+    
+    def display_genre(self):
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+    
+    display_genre.short_description = 'Genre'
     
 
 
