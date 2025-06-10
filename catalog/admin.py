@@ -16,9 +16,12 @@ class BooksInline(admin.TabularInline):
     model = Book
     extra = 0  # Number of empty forms to display
 
+
+@admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     """Define the admin interface for Author model."""
-    list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
+    list_display = ('last_name', 'first_name',
+                    'date_of_birth', 'date_of_death')
     # Adding Fields to the AuthorAdmin
     fields = ['first_name', 'last_name', ('date_of_birth', 'date_of_death')]
 
@@ -32,7 +35,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(BookInstance)
 class BookInstanceAdmin(admin.ModelAdmin):
-    list_filter = ('book','status', 'due_back','id')
+    list_filter = ('book', 'status', 'due_back', 'id')
 
     # add fields to the admin interface
     fieldsets = (
@@ -45,8 +48,5 @@ class BookInstanceAdmin(admin.ModelAdmin):
     )
 
 
-
-
 # Register the Author model with the custom admin interface
-admin.site.register(Author, AuthorAdmin)
-
+# admin.site.register(Author, AuthorAdmin)
