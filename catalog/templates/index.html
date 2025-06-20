@@ -21,4 +21,8 @@
     <li><strong>Books containing "{{ search_word_book }}":</strong> {{ num_books_containing_word }} </li>
     <li><strong>Genres containing "{{ search_word_genre }}":</strong> {{ num_genres_containing_word }} </li>
 </ul>
+
+<p>
+    You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.
+</p>
 {% endblock %}

@@ -1,3 +1,5 @@
+from django.conf import settings
+import uuid  # Required for unique book instances
 from django.db import models
 
 # Create your models here.
@@ -6,10 +8,16 @@ from django.db.models import UniqueConstraint
 from django.db.models.functions import Lower
 
 # Create genre model
-from django.urls import reverse # Used in get_absolute_url() to get URL for specified ID
+# Used in get_absolute_url() to get URL for specified ID
+from django.urls import reverse
 
-from django.db.models import UniqueConstraint # Constrains fields to unique values
-from django.db.models.functions import Lower # Returns lower cased value of field
+# Constrains fields to unique values
+from django.db.models import UniqueConstraint
+# Returns lower cased value of field
+from django.db.models.functions import Lower
+
+from datetime import date
+
 
 class Genre(models.Model):
     """Model representing a book genre."""
@@ -33,16 +41,18 @@ class Genre(models.Model):
             UniqueConstraint(
                 Lower('name'),
                 name='genre_name_case_insensitive_unique',
-                violation_error_message = "Genre already exists (case insensitive match)"
+                violation_error_message="Genre already exists (case insensitive match)"
             ),
         ]
 
 # Class Language
+
+
 class Language(models.Model):
     """Model representing a Language (e.g. English, French, Japanese, etc.)"""
     name = models.CharField(max_length=200,
                             help_text="Enter a the book's natural language (e.g. English, French, Japanese etc.)")
-    
+
     def get_absolute_url(self):
         """Returns the url to access a particular language instance."""
         return reverse('language-detail', args=[str(self.id)])
@@ -50,14 +60,14 @@ class Language(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return self.name
-    
+
     # Ensures that a language name is unique
     class Meta:
         constraints = [
             UniqueConstraint(
                 Lower('name'),
                 name='language_name_case_insensitive_unique',
-                violation_error_message = "Language already exists (case insensitive match)"
+                violation_error_message="Language already exists (case insensitive match)"
             ),
         ]
 
@@ -70,33 +80,36 @@ class Book(models.Model):
 
     # Foreign Key used because book can only have one author, but authors can have multiple books.
     # Author as a string rather than object because it hasn't been declared yet in file.
-    summary = models.TextField(max_length=1000, help_text="Enter a brief description of the book")
-    isbn = models.CharField('ISBN', max_length=13, unique=True, help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
-
+    summary = models.TextField(
+        max_length=1000, help_text="Enter a brief description of the book")
+    isbn = models.CharField('ISBN', max_length=13, unique=True,
+                            help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
 
     # ManyToManyField used because genre can contain many books. Books can cover many genres.
     # Genre class has already been defined so we can specify the object above.
-    genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
-    language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
+    genre = models.ManyToManyField(
+        Genre, help_text="Select a genre for this book")
+    language = models.ForeignKey(
+        'Language', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         """String for representing the Model object."""
         return self.title
-    
+
     def get_absolute_url(self):
         """Returns the url to access a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
-    
+
     def display_genre(self):
         return ', '.join(genre.name for genre in self.genre.all()[:3])
-    
+
     display_genre.short_description = 'Genre'
-    
 
 
 # Create book instance model
-import uuid # Required for unique book instances
 class BookInstance(models.Model):
+    borrower = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     """Model representing a specific copy of a book (i.e. that can be borrowed from the library)."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4,
@@ -121,12 +134,18 @@ class BookInstance(models.Model):
     )
 
     class Meta:
-        ordering = ['due_back']
+        ordering = ['due_back'],
+        permissions = (("can_mark_returned", "Set book as returned"),)
 
     def __str__(self):
         """String for representing the Model object."""
         return f'{self.id} ({self.book.title})'
-    
+
+    @property
+    def is_overdue(self):
+        """Determines if the book is overdue based on due date and current date."""
+        return bool(self.due_back and date.today() > self.due_back)
+
 
 # Class Author
 class Author(models.Model):
@@ -146,5 +165,3 @@ class Author(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return f'{self.first_name}, {self.last_name}'
-
-
