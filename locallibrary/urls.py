@@ -23,12 +23,14 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('catalog/', include('catalog.urls')),
-    
+    path('accounts/', include('django.contrib.auth.urls')),
+
     # The home page redirects to the catalog
-    path('', RedirectView.as_view(url='catalog/', permanent=True))
+    path('', RedirectView.as_view(url='catalog/', permanent=False))
 ]
 
 
 # static files (only in development)
-if settings.DEBUG: 
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
