@@ -35,6 +35,20 @@
                {% else %}
                <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
                {% endif %}
+
+               {% if user.is_staff %}
+               <hr>
+               <ul class="sidebar-nav">
+                  <li>Staff</li>
+                  <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
+                  {% if perms.catalog.add_author %}
+                  <li><a href="{% url 'author-create' %}">Create author</a></li>
+                  {% endif %}
+                  {% if perms.catalog.add_book %}
+                  <li><a href="{% url 'book-create' %}">Create book</a></li>
+                  {% endif %}
+               </ul>
+               {% endif %}
             </ul>
 
             {% endblock %}
